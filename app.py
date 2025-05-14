@@ -37,8 +37,16 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'ZmNkZTQzY2YzMTg0YjEwYjA3Zjk1
 # Database configuration - Use PostgreSQL in production and SQLite in development
 if os.getenv('RENDER'):
     # For Render, use PostgreSQL
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', '').replace('postgres://', 'postgresql://')
-    print("Using PostgreSQL database for production")
+    db_url = os.getenv('DATABASE_URL', '')
+    if db_url:
+        # Replace postgres:// with postgresql:// (SQLAlchemy compatibility)
+        db_url = db_url.replace('postgres://', 'postgresql://')
+        app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+        print("Using PostgreSQL database for production")
+    else:
+        # Fallback to SQLite if no DATABASE_URL is provided
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+        print("Warning: DATABASE_URL not found. Using SQLite database as fallback.")
 else:
     # Use SQLite for local development
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
@@ -56,6 +64,11 @@ login_manager.init_app(app)
 
 # Create upload directory if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Create database tables when the application starts
+with app.app_context():
+    db.create_all()
+    print("Database tables created")
 
 @login_manager.user_loader
 def load_user(user_id):

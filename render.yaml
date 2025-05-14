@@ -12,7 +12,9 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: expense_tracker_db
+          property: connectionString
       - key: RENDER
         value: "true"
 
