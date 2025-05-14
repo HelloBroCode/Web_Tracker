@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: expense-tracker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: RENDER
+        value: "true"
+
+databases:
+  - name: expense_tracker_db
+    databaseName: expense_tracker
+    user: expense_tracker_user 
