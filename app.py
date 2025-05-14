@@ -65,9 +65,33 @@ login_manager.init_app(app)
 # Create upload directory if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Create database tables when the application starts
+# Create database tables and add predefined categories when the application starts
 with app.app_context():
     db.create_all()
+    
+    # Check if global categories already exist
+    if Category.query.filter_by(user_id=None).count() == 0:
+        # Create default global categories
+        default_categories = [
+            "Food",
+            "Transport",
+            "Entertainment",
+            "Bills",
+            "Shopping",
+            "Health",
+            "Education",
+            "Travel",
+            "Housing",
+            "Others"
+        ]
+        
+        for category_name in default_categories:
+            category = Category(name=category_name, user_id=None)
+            db.session.add(category)
+        
+        db.session.commit()
+        print(f"Added {len(default_categories)} default categories")
+    
     print("Database tables created")
 
 @login_manager.user_loader
